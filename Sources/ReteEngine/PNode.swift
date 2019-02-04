@@ -25,8 +25,9 @@
 /// > the name of the production, its right-hand-side actions, etc. A p-node may also contain
 /// > information about the names of the variables that occur in the production.
 ///
-public final class PNode<Constant>: ReteNode<Constant> where Constant: Hashable {
-
+public final class PNode<WME>: ReteNode<WME>
+    where WME: ReteEngine.WME
+{
     /// The matching tokens.
     public private(set) var items: [Token] = []
 

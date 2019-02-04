@@ -19,11 +19,12 @@
 /// end
 /// ```
 ///
-public class ReteNode<Constant> where Constant: Hashable {
-
-    public typealias Token = ReteEngine.Token<Constant>
-    public typealias WME = ReteEngine.WME<Constant>
-    public typealias ReteNode = ReteEngine.ReteNode<Constant>
+public class ReteNode<WME>
+    where WME: ReteEngine.WME
+{
+    public typealias Constant = WME.Constant
+    public typealias Token = ReteEngine.Token<WME>
+    public typealias ReteNode = ReteEngine.ReteNode<WME>
 
     /// The node's children (other nodes in the beta part of the network).
     public private(set) var children: [ReteNode]

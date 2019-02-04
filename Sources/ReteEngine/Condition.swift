@@ -4,9 +4,10 @@
 /// A condition tests the fields of a working memory entry. Each condition field
 /// can can either be a constant test, or a variable.
 ///
-public struct Condition<Constant>: Hashable where Constant: Hashable {
-
-    public typealias WME = ReteEngine.WME<Constant>
+public struct Condition<WME>: Hashable
+    where WME: ReteEngine.WME
+{
+    public typealias Constant = WME.Constant
     public typealias ConditionField = ReteEngine.ConditionField<Constant>
 
     public let identifier: ConditionField

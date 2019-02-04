@@ -1,10 +1,7 @@
 
-public struct SetWorkingMemory<T>: WorkingMemory where T: Hashable {
-
-    public typealias Constant = T
-
-    public typealias WME = ReteEngine.WME<T>
-
+public struct SetWorkingMemory<WME>: WorkingMemory
+    where WME: ReteEngine.WME
+{
     /// The working memory entries
     public private(set) var workingMemoryEntries: Set<WME> = []
 

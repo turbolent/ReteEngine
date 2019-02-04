@@ -25,23 +25,24 @@
 public final class ReteNetwork<WorkingMemory>
     where WorkingMemory: ReteEngine.WorkingMemory
 {
-    public typealias Constant = WorkingMemory.Constant
-    public typealias WME = ReteEngine.WME<Constant>
-    public typealias AlphaMemory = ReteEngine.AlphaMemory<Constant>
-    public typealias ReteNode = ReteEngine.ReteNode<Constant>
-    public typealias Token = ReteEngine.Token<Constant>
-    public typealias TestAtJoinNode = ReteEngine.TestAtJoinNode<Constant>
-    public typealias BetaMemory = ReteEngine.BetaMemory<Constant>
-    public typealias JoinNode = ReteEngine.JoinNode<Constant>
-    public typealias Condition = ReteEngine.Condition<Constant>
-    public typealias PNode = ReteEngine.PNode<Constant>
+    public typealias WME = WorkingMemory.WME
+    public typealias Constant = WME.Constant
+    public typealias AlphaMemory = ReteEngine.AlphaMemory<WME>
+    public typealias ReteNode = ReteEngine.ReteNode<WME>
+    public typealias Token = ReteEngine.Token<WME>
+    public typealias TestAtJoinNode = ReteEngine.TestAtJoinNode<WME>
+    public typealias BetaMemory = ReteEngine.BetaMemory<WME>
+    public typealias JoinNode = ReteEngine.JoinNode<WME>
+    public typealias Condition = ReteEngine.Condition<WME>
+    public typealias PNode = ReteEngine.PNode<WME>
     public typealias AlphaMemoryIndex = ReteEngine.AlphaMemoryIndex<Constant>
+    public typealias DummyTopNode = ReteEngine.DummyTopNode<WME>
 
     /// The indexed alpha memories.
     public private(set) var alphaMemories: [AlphaMemoryIndex: AlphaMemory] = [:]
 
     /// The top most Rete node of the beta part.
-    public let betaRoot = DummyTopNode<Constant>()
+    public let betaRoot = DummyTopNode()
 
     public private(set) var workingMemory: WorkingMemory
 

@@ -33,8 +33,9 @@
 ///
 /// See `ReteNetwork.alphaMemories`.
 ///
-public struct AlphaMemoryIndex<Constant>: Hashable where Constant: Hashable {
-
+public struct AlphaMemoryIndex<Constant>: Hashable
+    where Constant: Hashable
+{
     public let identifier: Constant?
     public let attribute: Constant?
     public let value: Constant?
@@ -74,8 +75,6 @@ public struct AlphaMemoryIndex<Constant>: Hashable where Constant: Hashable {
 ///
 extension AlphaMemoryIndex {
 
-    public typealias Condition = ReteEngine.Condition<Constant>
-
     /// Creates an alpha memory index from the given condition.
     ///
     /// Constant tests of the condition are extracted, and variables of the condition
@@ -83,7 +82,9 @@ extension AlphaMemoryIndex {
     ///
     /// - Parameter condition: The condition to be used as a template for the new index.
     ///
-    public init(condition: Condition) {
+    public init<WME>(condition: Condition<WME>)
+        where WME.Constant == Constant
+    {
         let identifierTest: Constant?
         if case let .constant(constant) = condition.identifier {
             identifierTest = constant

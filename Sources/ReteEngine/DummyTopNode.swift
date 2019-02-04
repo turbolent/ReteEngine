@@ -10,4 +10,5 @@
 /// > of a dummy top node, however, simplifies the description and can also
 /// > simplify the implementation.
 ///
-public final class DummyTopNode<Constant>: ReteNode<Constant> where Constant: Hashable {}
+public final class DummyTopNode<WME>: ReteNode<WME>
+    where WME: ReteEngine.WME {}

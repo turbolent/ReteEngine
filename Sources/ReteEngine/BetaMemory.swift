@@ -19,8 +19,9 @@
 /// end
 /// ```
 ///
-public final class BetaMemory<Constant>: ReteNode<Constant> where Constant: Hashable {
-
+public final class BetaMemory<WME>: ReteNode<WME>
+    where WME: ReteEngine.WME
+{
     /// The partial instantiations of productions (tokens).
     public private(set) var items: [Token] = []
 

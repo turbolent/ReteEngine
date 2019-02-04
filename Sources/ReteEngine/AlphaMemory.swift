@@ -13,11 +13,11 @@
 /// end
 /// ```
 ///
-public final class AlphaMemory<Constant>: Equatable where Constant: Hashable {
-
-    public typealias WME = ReteEngine.WME<Constant>
-    public typealias JoinNode = ReteEngine.JoinNode<Constant>
-    public typealias AlphaMemory = ReteEngine.AlphaMemory<Constant>
+public final class AlphaMemory<WME>: Equatable
+    where WME: ReteEngine.WME
+{
+    public typealias JoinNode = ReteEngine.JoinNode<WME>
+    public typealias AlphaMemory = ReteEngine.AlphaMemory<WME>
 
     /// The matching working memory entries.
     public private(set) var items: [WME] = []

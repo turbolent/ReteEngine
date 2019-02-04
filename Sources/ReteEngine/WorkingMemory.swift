@@ -1,10 +1,10 @@
 
 public protocol WorkingMemory: Sequence
-    where Element == WME<Constant>
+    where Element == WME
 {
-    associatedtype Constant: Hashable
+    associatedtype WME: ReteEngine.WME
 
-    mutating func insert(wme: WME<Constant>) -> Bool
+    mutating func insert(wme: WME) -> Bool
 
     var count: Int { get }
 }

@@ -19,33 +19,10 @@
 /// > restriction on what symbols are allowed is that they must all be constants:
 /// > no variables are allowed in WMEs.
 ///
-public struct WME<Constant>: Hashable where Constant: Hashable {
+public protocol WME: Hashable {
+    associatedtype Constant: Hashable
 
-    public let identifier: Constant
-    public let attribute: Constant
-    public let value: Constant
-
-    /// Creates a working memory entry from the given identifier, attribute, and value.
-    ///
-    public init(identifier: Constant, attribute: Constant, value: Constant) {
-        self.identifier = identifier
-        self.attribute = attribute
-        self.value = value
-    }
-
-    /// Creates a working memory entry from the given identifier, attribute, and value.
-    ///
-    public init(_ identifier: Constant, _ attribute: Constant, _ value: Constant) {
-        self.init(
-            identifier: identifier,
-            attribute: attribute,
-            value: value
-        )
-    }
-}
-
-extension WME: CustomStringConvertible {
-    public var description: String {
-        return "(\(identifier) ^\(attribute) \(value))"
-    }
+    var identifier: Constant { get }
+    var attribute: Constant { get }
+    var value: Constant { get }
 }

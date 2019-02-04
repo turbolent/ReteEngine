@@ -28,12 +28,13 @@
 /// end
 /// ```
 ///
-public final class JoinNode<Constant>: ReteNode<Constant> where Constant: Hashable {
-
-    public typealias AlphaMemory = ReteEngine.AlphaMemory<Constant>
-    public typealias TestAtJoinNode = ReteEngine.TestAtJoinNode<Constant>
-    public typealias BetaMemory = ReteEngine.BetaMemory<Constant>
-    public typealias Condition = ReteEngine.Condition<Constant>
+public final class JoinNode<WME>: ReteNode<WME>
+    where WME: ReteEngine.WME
+{
+    public typealias AlphaMemory = ReteEngine.AlphaMemory<WME>
+    public typealias TestAtJoinNode = ReteEngine.TestAtJoinNode<WME>
+    public typealias BetaMemory = ReteEngine.BetaMemory<WME>
+    public typealias Condition = ReteEngine.Condition<WME>
 
     public let betaMemory: BetaMemory
     public let alphaMemory: AlphaMemory

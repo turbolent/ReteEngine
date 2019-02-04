@@ -22,9 +22,10 @@
 /// > is a field from a WME that matched some earlier condition in the production
 /// > (i.e., part of the token in the beta memory).
 ///
-public struct TestAtJoinNode<Constant>: Equatable where Constant: Hashable {
-
-    public typealias WME = ReteEngine.WME<Constant>
+public struct TestAtJoinNode<WME>: Equatable
+    where WME: ReteEngine.WME
+{
+    public typealias Constant = WME.Constant
 
     /// The field of the first working memory entry to be tested.
     /// It is one of the three fields of a working memory entry.

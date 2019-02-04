@@ -51,10 +51,11 @@
 /// end
 /// ```
 ///
-public final class Token<Constant>: Equatable where Constant: Hashable {
-
-    public typealias Token = ReteEngine.Token<Constant>
-    public typealias WME = ReteEngine.WME<Constant>
+public final class Token<WME>: Equatable
+    where WME: ReteEngine.WME
+{
+    public typealias Constant = WME.Constant
+    public typealias Token = ReteEngine.Token<WME>
 
     /// The parent token, for items 1...i-1.
     public let parent: Token?

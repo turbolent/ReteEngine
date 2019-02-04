@@ -4,7 +4,7 @@ import XCTest
 final class ReteEngineTests: XCTestCase {
 
     func testProductionItems() {
-        let workingMemory = SetWorkingMemory<String>()
+        let workingMemory = SetWorkingMemory<Triple<String>>()
         let network = ReteNetwork<SetWorkingMemory>(workingMemory: workingMemory)
         let pNode1 = network.addProduction(conditions: [
             Condition(
@@ -20,10 +20,10 @@ final class ReteEngineTests: XCTestCase {
         ])
         XCTAssertEqual(pNode1.items.count, 0)
 
-        network.add(wme: WME("A", "hasFather", "B"))
+        network.add(wme: Triple("A", "hasFather", "B"))
         XCTAssertEqual(pNode1.items.count, 0)
 
-        network.add(wme: WME("B", "hasBrother", "C"))
+        network.add(wme: Triple("B", "hasBrother", "C"))
         XCTAssertEqual(pNode1.items.count, 1)
         XCTAssertEqual(
             Set(pNode1.items.map { $0.allBindings }),
@@ -54,15 +54,15 @@ final class ReteEngineTests: XCTestCase {
             ])
         )
 
-        network.add(wme: WME("A", "hasFather", "B"))
+        network.add(wme: Triple("A", "hasFather", "B"))
         XCTAssertEqual(pNode1.items.count, 1)
         XCTAssertEqual(pNode2.items.count, network.workingMemory.count)
 
-        network.add(wme: WME("A", "hasFather", "B"))
+        network.add(wme: Triple("A", "hasFather", "B"))
         XCTAssertEqual(pNode1.items.count, 1)
         XCTAssertEqual(pNode2.items.count, network.workingMemory.count)
 
-        network.add(wme: WME("A", "hasFather", "D"))
+        network.add(wme: Triple("A", "hasFather", "D"))
         XCTAssertEqual(pNode1.items.count, 1)
         XCTAssertEqual(pNode2.items.count, network.workingMemory.count)
         XCTAssertEqual(
@@ -82,7 +82,7 @@ final class ReteEngineTests: XCTestCase {
             ])
         )
 
-        network.add(wme: WME("D", "hasBrother", "E"))
+        network.add(wme: Triple("D", "hasBrother", "E"))
         XCTAssertEqual(pNode1.items.count, 2)
         XCTAssertEqual(pNode2.items.count, network.workingMemory.count)
         XCTAssertEqual(
@@ -106,7 +106,7 @@ final class ReteEngineTests: XCTestCase {
             ])
         )
 
-        network.add(wme: WME("D", "hasSister", "F"))
+        network.add(wme: Triple("D", "hasSister", "F"))
         let pNode3 = network.addProduction(conditions: [
             Condition(
                 .variable(name: "son"),
@@ -154,19 +154,19 @@ final class ReteEngineTests: XCTestCase {
     }
 
     func testNetwork() {
-        let workingMemory = SetWorkingMemory<String>()
+        let workingMemory = SetWorkingMemory<Triple<String>>()
         let network = ReteNetwork<SetWorkingMemory>(workingMemory: workingMemory)
-        let c0 = Condition(
+        let c0 = Condition<Triple>(
             .variable(name: "x"),
             .constant("on"),
             .variable(name: "y")
         )
-        let c1 = Condition(
+        let c1 = Condition<Triple>(
             .variable(name: "y"),
             .constant("left-of"),
             .variable(name: "z")
         )
-        let c2 = Condition(
+        let c2 = Condition<Triple>(
             .variable(name: "z"),
             .constant("color"),
             .constant("red")
@@ -184,15 +184,15 @@ final class ReteEngineTests: XCTestCase {
         let matchC0c1c2 = joinOnValueZ.children[0]
 
         let wmes = [
-            WME("B1", "on", "B2"),
-            WME("B1", "on", "B3"),
-            WME("B1", "color", "red"),
-            WME("B2", "on", "table"),
-            WME("B2", "left-of", "B3"),
-            WME("B2", "color", "blue"),
-            WME("B3", "left-of", "B4"),
-            WME("B3", "on", "table"),
-            WME("B3", "color", "red")
+            Triple("B1", "on", "B2"),
+            Triple("B1", "on", "B3"),
+            Triple("B1", "color", "red"),
+            Triple("B2", "on", "table"),
+            Triple("B2", "left-of", "B3"),
+            Triple("B2", "color", "blue"),
+            Triple("B3", "left-of", "B4"),
+            Triple("B3", "on", "table"),
+            Triple("B3", "color", "red")
         ]
         for wme in wmes {
             network.add(wme: wme)
@@ -212,19 +212,19 @@ final class ReteEngineTests: XCTestCase {
     }
 
     func testDuplicate() {
-        let workingMemory = SetWorkingMemory<String>()
+        let workingMemory = SetWorkingMemory<Triple<String>>()
         let network = ReteNetwork<SetWorkingMemory>(workingMemory: workingMemory)
-        let c0 = Condition(
+        let c0 = Condition<Triple>(
             .variable(name: "x"),
             .constant("self"),
             .variable(name: "y")
         )
-        let c1 = Condition(
+        let c1 = Condition<Triple>(
             .variable(name: "x"),
             .constant("color"),
             .constant("red")
         )
-        let c2 = Condition(
+        let c2 = Condition<Triple>(
             .variable(name: "y"),
             .constant("color"),
             .constant("red")
@@ -232,8 +232,8 @@ final class ReteEngineTests: XCTestCase {
         network.addProduction(conditions: [c0, c1, c2])
 
         let wmes = [
-            WME("B1", "self", "B1"),
-            WME("B1", "color", "red"),
+            Triple("B1", "self", "B1"),
+            Triple("B1", "color", "red"),
         ]
         for wme in wmes {
             network.add(wme: wme)
@@ -247,27 +247,47 @@ final class ReteEngineTests: XCTestCase {
     }
 
     func testMultiProductions() {
-        let workingMemory = SetWorkingMemory<String>()
+        let workingMemory = SetWorkingMemory<Triple<String>>()
         let network = ReteNetwork<SetWorkingMemory>(workingMemory: workingMemory)
-        let c0 = Condition(.variable(name: "x"), .constant("on"), .variable(name: "y"))
-        let c1 = Condition(.variable(name: "y"), .constant("left-of"), .variable(name: "z"))
-        let c2 = Condition(.variable(name: "z"), .constant("color"), .constant("red"))
-        let c3 = Condition(.variable(name: "z"), .constant("on"), .constant("table"))
-        let c4 = Condition(.variable(name: "z"), .constant("left-of"), .constant("B4"))
+        let c0 = Condition<Triple>(
+            .variable(name: "x"),
+            .constant("on"),
+            .variable(name: "y")
+        )
+        let c1 = Condition<Triple>(
+            .variable(name: "y"),
+            .constant("left-of"),
+            .variable(name: "z")
+        )
+        let c2 = Condition<Triple>(
+            .variable(name: "z"),
+            .constant("color"),
+            .constant("red")
+        )
+        let c3 = Condition<Triple>(
+            .variable(name: "z"),
+            .constant("on"),
+            .constant("table")
+        )
+        let c4 = Condition<Triple>(
+            .variable(name: "z"),
+            .constant("left-of"),
+            .constant("B4")
+        )
 
         let p0 = network.addProduction(conditions: [c0, c1, c2])
         let p1 = network.addProduction(conditions: [c0, c1, c3, c4])
 
         let wmes = [
-            WME("B1", "on", "B2"),
-            WME("B1", "on", "B3"),
-            WME("B1", "color", "red"),
-            WME("B2", "on", "table"),
-            WME("B2", "left-of", "B3"),
-            WME("B2", "color", "blue"),
-            WME("B3", "left-of", "B4"),
-            WME("B3", "on", "table"),
-            WME("B3", "color", "red"),
+            Triple("B1", "on", "B2"),
+            Triple("B1", "on", "B3"),
+            Triple("B1", "color", "red"),
+            Triple("B2", "on", "table"),
+            Triple("B2", "left-of", "B3"),
+            Triple("B2", "color", "blue"),
+            Triple("B3", "left-of", "B4"),
+            Triple("B3", "on", "table"),
+            Triple("B3", "color", "red"),
             ]
         for wme in wmes {
             network.add(wme: wme)
@@ -285,9 +305,9 @@ final class ReteEngineTests: XCTestCase {
     }
 
     func testTokenBinding() {
-        let t1 = Token(bindings: ["x": 1])
-        let t2 = Token(parent: t1, bindings: ["y": 2])
-        let t3 = Token(parent: t2, bindings: ["z": 3])
+        let t1 = Token<Triple>(bindings: ["x": 1])
+        let t2 = Token<Triple>(parent: t1, bindings: ["y": 2])
+        let t3 = Token<Triple>(parent: t2, bindings: ["z": 3])
 
         XCTAssertEqual(t3.allBindings, ["x": 1, "y": 2, "z": 3])
         XCTAssertEqual(t3.getBinding(variableName: "x"), 1)
