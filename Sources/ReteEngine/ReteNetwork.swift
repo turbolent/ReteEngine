@@ -22,8 +22,10 @@
 /// > [...] the basic idea is that the alpha network performs all the tests which involve
 /// > a single WME, while the beta network performs tests involving two or more WMEs.
 ///
-public final class ReteNetwork<Constant> where Constant: Hashable {
-
+public final class ReteNetwork<WorkingMemory>
+    where WorkingMemory: ReteEngine.WorkingMemory
+{
+    public typealias Constant = WorkingMemory.Constant
     public typealias WME = ReteEngine.WME<Constant>
     public typealias AlphaMemory = ReteEngine.AlphaMemory<Constant>
     public typealias ReteNode = ReteEngine.ReteNode<Constant>
@@ -35,18 +37,19 @@ public final class ReteNetwork<Constant> where Constant: Hashable {
     public typealias PNode = ReteEngine.PNode<Constant>
     public typealias AlphaMemoryIndex = ReteEngine.AlphaMemoryIndex<Constant>
 
-    /// The working memory entries stored in the network.
-    public private(set) var workingMemoryEntries: Set<WME> = []
-
     /// The indexed alpha memories.
     public private(set) var alphaMemories: [AlphaMemoryIndex: AlphaMemory] = [:]
 
     /// The top most Rete node of the beta part.
     public let betaRoot = DummyTopNode<Constant>()
 
+    public private(set) var workingMemory: WorkingMemory
+
     /// Creates a new empty network.
     ///
-    public init() {}
+    public init(workingMemory: WorkingMemory) {
+        self.workingMemory = workingMemory
+    }
 }
 
 /// ## CMU-CS-95-113:  2.2 Alpha Net Implementation
@@ -119,7 +122,7 @@ extension ReteNetwork {
     ///
     public func add(wme: WME) {
 
-        let (inserted, _) = workingMemoryEntries.insert(wme)
+        let inserted = workingMemory.insert(wme: wme)
         guard inserted else {
             return
         }
@@ -520,7 +523,7 @@ extension ReteNetwork {
         alphaMemories[alphaMemoryIndex] = alphaMemory
 
         // initialize alpha memory with any current WMEs
-        for wme in workingMemoryEntries
+        for wme in workingMemory
             where condition.test(wme: wme)
         {
             alphaMemory.activate(wme: wme)

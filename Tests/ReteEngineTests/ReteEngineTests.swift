@@ -4,7 +4,8 @@ import XCTest
 final class ReteEngineTests: XCTestCase {
 
     func testProductionItems() {
-        let network = ReteNetwork<String>()
+        let workingMemory = SetWorkingMemory<String>()
+        let network = ReteNetwork<SetWorkingMemory>(workingMemory: workingMemory)
         let pNode1 = network.addProduction(conditions: [
             Condition(
                 .variable(name: "son"),
@@ -43,7 +44,7 @@ final class ReteEngineTests: XCTestCase {
         XCTAssertEqual(pNode1.items.count, 1)
         XCTAssertEqual(
             pNode2.items.count,
-            network.workingMemoryEntries.count
+            network.workingMemory.count
         )
         XCTAssertEqual(
             Set(pNode2.items.map { $0.allBindings }),
@@ -55,15 +56,15 @@ final class ReteEngineTests: XCTestCase {
 
         network.add(wme: WME("A", "hasFather", "B"))
         XCTAssertEqual(pNode1.items.count, 1)
-        XCTAssertEqual(pNode2.items.count, network.workingMemoryEntries.count)
+        XCTAssertEqual(pNode2.items.count, network.workingMemory.count)
 
         network.add(wme: WME("A", "hasFather", "B"))
         XCTAssertEqual(pNode1.items.count, 1)
-        XCTAssertEqual(pNode2.items.count, network.workingMemoryEntries.count)
+        XCTAssertEqual(pNode2.items.count, network.workingMemory.count)
 
         network.add(wme: WME("A", "hasFather", "D"))
         XCTAssertEqual(pNode1.items.count, 1)
-        XCTAssertEqual(pNode2.items.count, network.workingMemoryEntries.count)
+        XCTAssertEqual(pNode2.items.count, network.workingMemory.count)
         XCTAssertEqual(
             Set(pNode1.items.map { $0.allBindings }),
             Set([
@@ -83,7 +84,7 @@ final class ReteEngineTests: XCTestCase {
 
         network.add(wme: WME("D", "hasBrother", "E"))
         XCTAssertEqual(pNode1.items.count, 2)
-        XCTAssertEqual(pNode2.items.count, network.workingMemoryEntries.count)
+        XCTAssertEqual(pNode2.items.count, network.workingMemory.count)
         XCTAssertEqual(
             Set(pNode1.items.map { $0.allBindings }),
             Set([
@@ -119,7 +120,7 @@ final class ReteEngineTests: XCTestCase {
             )
         ])
         XCTAssertEqual(pNode1.items.count, 2)
-        XCTAssertEqual(pNode2.items.count, network.workingMemoryEntries.count)
+        XCTAssertEqual(pNode2.items.count, network.workingMemory.count)
         XCTAssertEqual(pNode3.items.count, 1)
         XCTAssertEqual(
             Set(pNode1.items.map { $0.allBindings }),
@@ -153,7 +154,8 @@ final class ReteEngineTests: XCTestCase {
     }
 
     func testNetwork() {
-        let network = ReteNetwork<String>()
+        let workingMemory = SetWorkingMemory<String>()
+        let network = ReteNetwork<SetWorkingMemory>(workingMemory: workingMemory)
         let c0 = Condition(
             .variable(name: "x"),
             .constant("on"),
@@ -210,7 +212,8 @@ final class ReteEngineTests: XCTestCase {
     }
 
     func testDuplicate() {
-        let network = ReteNetwork<String>()
+        let workingMemory = SetWorkingMemory<String>()
+        let network = ReteNetwork<SetWorkingMemory>(workingMemory: workingMemory)
         let c0 = Condition(
             .variable(name: "x"),
             .constant("self"),
@@ -244,15 +247,16 @@ final class ReteEngineTests: XCTestCase {
     }
 
     func testMultiProductions() {
-        let net = ReteNetwork<String>()
+        let workingMemory = SetWorkingMemory<String>()
+        let network = ReteNetwork<SetWorkingMemory>(workingMemory: workingMemory)
         let c0 = Condition(.variable(name: "x"), .constant("on"), .variable(name: "y"))
         let c1 = Condition(.variable(name: "y"), .constant("left-of"), .variable(name: "z"))
         let c2 = Condition(.variable(name: "z"), .constant("color"), .constant("red"))
         let c3 = Condition(.variable(name: "z"), .constant("on"), .constant("table"))
         let c4 = Condition(.variable(name: "z"), .constant("left-of"), .constant("B4"))
 
-        let p0 = net.addProduction(conditions: [c0, c1, c2])
-        let p1 = net.addProduction(conditions: [c0, c1, c3, c4])
+        let p0 = network.addProduction(conditions: [c0, c1, c2])
+        let p1 = network.addProduction(conditions: [c0, c1, c3, c4])
 
         let wmes = [
             WME("B1", "on", "B2"),
@@ -266,10 +270,10 @@ final class ReteEngineTests: XCTestCase {
             WME("B3", "color", "red"),
             ]
         for wme in wmes {
-            net.add(wme: wme)
+            network.add(wme: wme)
         }
 
-        let p2 = net.addProduction(conditions: [c0, c1, c3, c2])
+        let p2 = network.addProduction(conditions: [c0, c1, c3, c2])
 
         XCTAssertEqual(p0.items.count, 1)
         XCTAssertEqual(p1.items.count, 1)
