@@ -24,6 +24,14 @@ final class ReteEngineTests: XCTestCase {
 
         network.add(wme: WME("B", "hasBrother", "C"))
         XCTAssertEqual(pNode1.items.count, 1)
+        XCTAssertEqual(
+            Set(pNode1.items.map { $0.allBindings }),
+            Set([
+                ["son": "A",
+                 "father": "B",
+                 "fathersBrother": "C"]
+            ])
+        )
 
         let pNode2 = network.addProduction(conditions: [
             Condition(
@@ -33,11 +41,22 @@ final class ReteEngineTests: XCTestCase {
             )
         ])
         XCTAssertEqual(pNode1.items.count, 1)
-        XCTAssertEqual(pNode2.items.count, network.workingMemoryEntries.count)
+        XCTAssertEqual(
+            pNode2.items.count,
+            network.workingMemoryEntries.count
+        )
+        XCTAssertEqual(
+            Set(pNode2.items.map { $0.allBindings }),
+            Set([
+                ["x": "A", "y": "hasFather", "z": "B"],
+                ["x": "B", "y": "hasBrother", "z": "C"],
+            ])
+        )
 
         network.add(wme: WME("A", "hasFather", "B"))
         XCTAssertEqual(pNode1.items.count, 1)
         XCTAssertEqual(pNode2.items.count, network.workingMemoryEntries.count)
+
         network.add(wme: WME("A", "hasFather", "B"))
         XCTAssertEqual(pNode1.items.count, 1)
         XCTAssertEqual(pNode2.items.count, network.workingMemoryEntries.count)
@@ -45,11 +64,48 @@ final class ReteEngineTests: XCTestCase {
         network.add(wme: WME("A", "hasFather", "D"))
         XCTAssertEqual(pNode1.items.count, 1)
         XCTAssertEqual(pNode2.items.count, network.workingMemoryEntries.count)
+        XCTAssertEqual(
+            Set(pNode1.items.map { $0.allBindings }),
+            Set([
+                ["son": "A",
+                 "father": "B",
+                 "fathersBrother": "C"]
+            ])
+        )
+        XCTAssertEqual(
+            Set(pNode2.items.map { $0.allBindings }),
+            Set([
+                ["x": "A", "y": "hasFather", "z": "B"],
+                ["x": "A", "y": "hasFather", "z": "D"],
+                ["x": "B", "y": "hasBrother", "z": "C"],
+            ])
+        )
 
         network.add(wme: WME("D", "hasBrother", "E"))
         XCTAssertEqual(pNode1.items.count, 2)
         XCTAssertEqual(pNode2.items.count, network.workingMemoryEntries.count)
+        XCTAssertEqual(
+            Set(pNode1.items.map { $0.allBindings }),
+            Set([
+                ["son": "A",
+                 "father": "B",
+                 "fathersBrother": "C"],
+                ["son": "A",
+                 "father": "D",
+                 "fathersBrother": "E"],
+                ])
+        )
+        XCTAssertEqual(
+            Set(pNode2.items.map { $0.allBindings }),
+            Set([
+                ["x": "A", "y": "hasFather", "z": "B"],
+                ["x": "A", "y": "hasFather", "z": "D"],
+                ["x": "B", "y": "hasBrother", "z": "C"],
+                ["x": "D", "y": "hasBrother", "z": "E"],
+            ])
+        )
 
+        network.add(wme: WME("D", "hasSister", "F"))
         let pNode3 = network.addProduction(conditions: [
             Condition(
                 .variable(name: "son"),
@@ -60,16 +116,40 @@ final class ReteEngineTests: XCTestCase {
                 .variable(name: "father"),
                 .constant("hasSister"),
                 .variable(name: "fathersSister")
-            ),
-            ])
-        XCTAssertEqual(pNode1.items.count, 2)
-        XCTAssertEqual(pNode2.items.count, network.workingMemoryEntries.count)
-        XCTAssertEqual(pNode3.items.count, 0)
-
-        network.add(wme: WME("D", "hasSister", "F"))
+            )
+        ])
         XCTAssertEqual(pNode1.items.count, 2)
         XCTAssertEqual(pNode2.items.count, network.workingMemoryEntries.count)
         XCTAssertEqual(pNode3.items.count, 1)
+        XCTAssertEqual(
+            Set(pNode1.items.map { $0.allBindings }),
+            Set([
+                ["son": "A",
+                 "father": "B",
+                 "fathersBrother": "C"],
+                ["son": "A",
+                 "father": "D",
+                 "fathersBrother": "E"],
+                ])
+        )
+        XCTAssertEqual(
+            Set(pNode2.items.map { $0.allBindings }),
+            Set([
+                ["x": "A", "y": "hasFather", "z": "B"],
+                ["x": "A", "y": "hasFather", "z": "D"],
+                ["x": "B", "y": "hasBrother", "z": "C"],
+                ["x": "D", "y": "hasBrother", "z": "E"],
+                ["x": "D", "y": "hasSister", "z": "F"],
+            ])
+        )
+        XCTAssertEqual(
+            Set(pNode3.items.map { $0.allBindings }),
+            Set([
+                ["son": "A",
+                 "father": "D",
+                 "fathersSister": "F"],
+            ])
+        )
     }
 
     func testNetwork() {
@@ -123,7 +203,7 @@ final class ReteEngineTests: XCTestCase {
         XCTAssertEqual((matchC0c1 as? BetaMemory)?.items.count, 2)
         XCTAssertEqual((matchC0c1c2 as? PNode)?.items.count, 1)
 
-        let t0 = Token(parent: Token(parent: nil, wme: nil), wme: wmes[0])
+        let t0 = Token(parent: Token(), wme: wmes[0])
         let t1 = Token(parent: t0, wme: wmes[4])
         let t2 = Token(parent: t1, wme: wmes[8])
         XCTAssertEqual((matchC0c1c2 as? PNode)?.items[0], t2)
@@ -198,5 +278,16 @@ final class ReteEngineTests: XCTestCase {
         XCTAssertEqual(p1.items[0].workingMemoryEntries, [wmes[0], wmes[4], wmes[7], wmes[6]])
         XCTAssertEqual(p2.items[0].workingMemoryEntries, [wmes[0], wmes[4], wmes[7], wmes[8]])
 
+    }
+
+    func testTokenBinding() {
+        let t1 = Token(bindings: ["x": 1])
+        let t2 = Token(parent: t1, bindings: ["y": 2])
+        let t3 = Token(parent: t2, bindings: ["z": 3])
+
+        XCTAssertEqual(t3.allBindings, ["x": 1, "y": 2, "z": 3])
+        XCTAssertEqual(t3.getBinding(variableName: "x"), 1)
+        XCTAssertEqual(t3.getBinding(variableName: "y"), 2)
+        XCTAssertEqual(t3.getBinding(variableName: "z"), 3)
     }
 }

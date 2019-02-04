@@ -56,11 +56,14 @@ public final class Token<Constant>: Equatable where Constant: Hashable {
     public typealias Token = ReteEngine.Token<Constant>
     public typealias WME = ReteEngine.WME<Constant>
 
-    /// Points to the higher token, for items 1...i-1.
+    /// The parent token, for items 1...i-1.
     public let parent: Token?
 
-    /// Gives item i.
+    /// The working memory entry, item i.
     public let wme: WME?
+
+    /// The variable bindings.
+    public let bindings: [String: Constant]
 
     /// Creates a token for the given parent (pointer to the higher token,
     /// for items 1...i-1) and working memory entry (item i)
@@ -68,10 +71,16 @@ public final class Token<Constant>: Equatable where Constant: Hashable {
     /// - Parameters:
     ///   - parent: The pointer to the higher token, for items 1...i-1.
     ///   - wme: The working memory entry (item i).
+    ///   - bindings: The variable bindings.
     ///
-    public init(parent: Token?, wme: WME?) {
+    public init(
+        parent: Token? = nil,
+        wme: WME? = nil,
+        bindings: [String: Constant] = [:]
+    ) {
         self.parent = parent
         self.wme = wme
+        self.bindings = bindings
     }
 
     /// Returns all working memory entries of this token.
@@ -79,7 +88,7 @@ public final class Token<Constant>: Equatable where Constant: Hashable {
     /// The working memory entry of this token (item i) will be the last entry
     /// of the resulting array, preceeded by the items 1...i-1.
     ///
-    public var workingMemoryEntries: [WME] {
+    public lazy var workingMemoryEntries: [WME] = {
         var entries: [WME] = []
         var current: Token? = self
         while let token = current,
@@ -90,7 +99,41 @@ public final class Token<Constant>: Equatable where Constant: Hashable {
             current = token.parent
         }
         return entries.reversed()
+    }()
+
+    /// Finds the binding for the given variable, if any.
+    ///
+    /// - Parameter variableName: The variable name to look for.
+    ///
+    /// - Returns: The constant which the variable is bound to, if any.
+    ///
+    public func getBinding(variableName: String) -> Constant? {
+        var t: Token? = self
+        repeat {
+            if let constant = t?.bindings[variableName] {
+                return constant
+            }
+            t = t?.parent
+        } while t != nil
+        return nil
     }
+
+    /// Returns all variable bindings.
+    ///
+    public lazy var allBindings: [String: Constant] = {
+        var allBindings = bindings
+        var t: Token? = parent
+        repeat {
+            if let newBindings = t?.bindings {
+                allBindings.merge(newBindings) { old, new in
+                    assert(old == new, "consistency problem in token variable bindings")
+                    return new
+                }
+            }
+            t = t?.parent
+        } while t != nil
+        return allBindings
+    }()
 
     public static func == (lhs: Token, rhs: Token) -> Bool {
         return lhs.parent == rhs.parent

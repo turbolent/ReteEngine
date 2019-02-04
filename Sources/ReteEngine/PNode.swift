@@ -32,12 +32,17 @@ public final class PNode<Constant>: ReteNode<Constant> where Constant: Hashable 
 
     /// Informs the node of a new match (a token and a working memory entry).
     ///
+    /// - Parameters:
+    ///   - token: The matching token (partial instantiation of a production).
+    ///   - wme: The matching working memory entry.
+    ///   - bindings: The variable bindings.
+    ///
     /// ## CMU-CS-95-113:  2.1 Overview
     ///
     /// > Whenever a p-node gets activated, it signals the newly found complete match.
     ///
-    public override func leftActivation(token: Token, wme: WME?) {
-        let newToken = Token(parent: token, wme: wme)
+    public override func leftActivation(token: Token, wme: WME?, bindings: [String: Constant]) {
+        let newToken = Token(parent: token, wme: wme, bindings: bindings)
         items.append(newToken)
     }
 }

@@ -324,13 +324,13 @@ extension ReteNetwork {
         }
 
         // create new node
+        let initialToken = parent === betaRoot
+            ? Token()
+            : nil
         let new = BetaMemory(
             parent: parent,
-            initialToken: parent === betaRoot
-                ? Token(parent: nil, wme: nil)
-                : nil
+            initialToken: initialToken
         )
-        // dummy top beta memory
         parent.add(child: new)
         updateNewNodeWithMatchesFromAbove(newNode: new)
         return new

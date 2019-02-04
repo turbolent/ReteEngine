@@ -75,6 +75,11 @@ public class ReteNode<Constant> where Constant: Hashable {
     /// - Parameters:
     ///   - token: The matching token (partial instantiation of a production).
     ///   - wme: The matching working memory entry.
+    ///   - bindings: The variable bindings.
     ///
-    func leftActivation(token: Token, wme: WME? = nil) {}
+    func leftActivation(
+        token: Token,
+        wme: WME? = nil,
+        bindings: [String: Constant] = [:]
+    ) {}
 }

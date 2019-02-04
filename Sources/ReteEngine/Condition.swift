@@ -120,6 +120,18 @@ public struct Condition<Constant>: Hashable where Constant: Hashable {
 
         return true
     }
+
+    /// Returns the variable bindings for the given working memory entry.
+    ///
+    /// - Parameter wme: The working memory entry from which to extract the constants.
+    ///
+    public func bindings(forWME wme: WME) -> [String: Constant] {
+        var bindings: [String: Constant] = [:]
+        for (keyPath, variableName) in variables {
+            bindings[variableName] = wme[keyPath: keyPath]
+        }
+        return bindings
+    }
 }
 
 extension Condition: CustomStringConvertible {

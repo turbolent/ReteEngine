@@ -88,8 +88,13 @@ public final class JoinNode<Constant>: ReteNode<Constant> where Constant: Hashab
         for token in betaMemory.items
             where performJoinTest(token: token, wme: wme)
         {
+            let bindings = condition.bindings(forWME: wme)
             children.forEach {
-                $0.leftActivation(token: token, wme: wme)
+                $0.leftActivation(
+                    token: token,
+                    wme: wme,
+                    bindings: bindings
+                )
             }
         }
     }
@@ -99,6 +104,7 @@ public final class JoinNode<Constant>: ReteNode<Constant> where Constant: Hashab
     /// - Parameters:
     ///   - token: The matching token (partial instantiation of a production).
     ///   - wme: The matching working memory entry.
+    ///   - bindings: The variable bindings.
     ///
     /// ## CMU-CS-95-113:  2.4 Join Node Implementation
     ///
@@ -116,12 +122,21 @@ public final class JoinNode<Constant>: ReteNode<Constant> where Constant: Hashab
     /// end
     /// ```
     ///
-    public override func leftActivation(token: Token, wme _: WME? = nil) {
+    public override func leftActivation(
+        token: Token,
+        wme _: WME? = nil,
+        bindings _: [String: Constant]
+    ) {
         for wme in alphaMemory.items
             where performJoinTest(token: token, wme: wme)
         {
+            let bindings = condition.bindings(forWME: wme)
             children.forEach {
-                $0.leftActivation(token: token, wme: wme)
+                $0.leftActivation(
+                    token: token,
+                    wme: wme,
+                    bindings: bindings
+                )
             }
         }
     }

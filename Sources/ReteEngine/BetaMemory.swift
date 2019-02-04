@@ -43,6 +43,7 @@ public final class BetaMemory<Constant>: ReteNode<Constant> where Constant: Hash
     /// - Parameters:
     ///   - token: The matching token (partial instantiation of a production).
     ///   - wme: The matching working memory entry.
+    ///   - bindings: The variable bindings.
     ///
     /// ## CMU-CS-95-113:  2.3.2 Beta Memory Implementation
     ///
@@ -61,9 +62,12 @@ public final class BetaMemory<Constant>: ReteNode<Constant> where Constant: Hash
     /// end
     /// ```
     ///
-    public override func leftActivation(token: Token, wme: WME? = nil) {
-        let newToken = Token(parent: token, wme: wme)
-
+    public override func leftActivation(
+        token: Token,
+        wme: WME? = nil,
+        bindings: [String: Constant]
+    ) {
+        let newToken = Token(parent: token, wme: wme, bindings: bindings)
         items.append(newToken)
 
         children.forEach {
