@@ -314,4 +314,20 @@ final class ReteEngineTests: XCTestCase {
         XCTAssertEqual(t3.getBinding(variableName: "y"), 2)
         XCTAssertEqual(t3.getBinding(variableName: "z"), 3)
     }
+
+    func testActionPatternSubstitution() {
+        let p1 = ActionPattern<Triple<String>>(
+            .variable(name: "x"),
+            .variable(name: "y"),
+            .variable(name: "z")
+        )
+        XCTAssertEqual(
+            p1.substitute(bindings: ["x": "1", "y": "2", "z": "3"]),
+            Triple("1", "2", "3")
+        )
+        XCTAssertEqual(
+            p1.substitute(bindings: ["x": "1", "z": "3"]),
+            nil
+        )
+    }
 }
