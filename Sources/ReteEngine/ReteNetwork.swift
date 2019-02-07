@@ -385,11 +385,14 @@ extension ReteNetwork {
     ) -> JoinNode {
 
         // look for an existing node to share
-        if let existing = parent.children.first(where: { $0 is JoinNode }) as? JoinNode,
-            existing.alphaMemory == alphaMemory,
-            existing.tests == tests,
-            existing.condition == condition
-        {
+        if let existing = parent.children.first(where: {
+            guard let existing = $0 as? JoinNode else {
+                return false
+            }
+            return existing.alphaMemory == alphaMemory
+                && existing.tests == tests
+                && existing.condition == condition
+        }) as? JoinNode {
             return existing
         }
 
