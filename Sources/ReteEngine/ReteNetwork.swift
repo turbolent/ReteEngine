@@ -323,7 +323,7 @@ extension ReteNetwork {
     ///
     private func buildOrShareBetaMemory(parent: ReteNode) -> BetaMemory {
         // look for an existing node to share
-        if let existing = parent.children.first(where: { $0 is BetaMemory }) as? BetaMemory {
+        if let existing = findExistingBetaMemory(parent: parent) {
             return existing
         }
 
@@ -338,6 +338,10 @@ extension ReteNetwork {
         parent.add(child: new)
         updateNewNodeWithMatchesFromAbove(newNode: new)
         return new
+    }
+
+    private func findExistingBetaMemory(parent: ReteNode) -> BetaMemory? {
+        return parent.children.first(where: { $0 is BetaMemory }) as? BetaMemory
     }
 
     /// Builds or shares a join node.
@@ -385,14 +389,12 @@ extension ReteNetwork {
     ) -> JoinNode {
 
         // look for an existing node to share
-        if let existing = parent.children.first(where: {
-            guard let existing = $0 as? JoinNode else {
-                return false
-            }
-            return existing.alphaMemory == alphaMemory
-                && existing.tests == tests
-                && existing.condition == condition
-        }) as? JoinNode {
+        if let existing = findExistingJoinNode(
+            parent: parent,
+            alphaMemory: alphaMemory,
+            tests: tests,
+            condition: condition
+        ) {
             return existing
         }
 
@@ -406,6 +408,23 @@ extension ReteNetwork {
         parent.add(child: new)
         alphaMemory.add(successor: new)
         return new
+    }
+
+    private func findExistingJoinNode(
+        parent: BetaMemory,
+        alphaMemory: AlphaMemory,
+        tests: [TestAtJoinNode],
+        condition: Condition
+    ) -> JoinNode? {
+        func test(node: ReteNode) -> Bool {
+            guard let joinNode = node as? JoinNode else {
+                return false
+            }
+            return joinNode.alphaMemory == alphaMemory
+                && joinNode.tests == tests
+                && joinNode.condition == condition
+        }
+        return parent.children.first(where: test) as? JoinNode
     }
 
     /// Returns tests to be performed at a join node for the given condition
