@@ -22,8 +22,10 @@
 /// > [...] the basic idea is that the alpha network performs all the tests which involve
 /// > a single WME, while the beta network performs tests involving two or more WMEs.
 ///
-public final class ReteNetwork<WorkingMemory>
-    where WorkingMemory: ReteEngine.WorkingMemory
+public final class ReteNetwork<WorkingMemory, ProductionTarget>
+    where WorkingMemory: ReteEngine.WorkingMemory,
+        ProductionTarget: ReteEngine.ProductionTarget,
+        WorkingMemory.WME == ProductionTarget.WME
 {
     public typealias WME = WorkingMemory.WME
     public typealias Constant = WME.Constant
@@ -34,7 +36,7 @@ public final class ReteNetwork<WorkingMemory>
     public typealias BetaMemory = ReteEngine.BetaMemory<WME>
     public typealias JoinNode = ReteEngine.JoinNode<WME>
     public typealias Condition = ReteEngine.Condition<WME>
-    public typealias PNode = ReteEngine.PNode<WME>
+    public typealias PNode = ReteEngine.PNode<ProductionTarget>
     public typealias AlphaMemoryIndex = ReteEngine.AlphaMemoryIndex<Constant>
     public typealias DummyTopNode = ReteEngine.DummyTopNode<WME>
 
@@ -200,14 +202,14 @@ extension ReteNetwork {
     /// ```
     ///
     @discardableResult
-    public func addProduction(conditions: [Condition]) -> PNode {
+    public func addProduction(conditions: [Condition], target: ProductionTarget) -> PNode {
         let currentNode = buildOrShareNetworkForConditions(
             parent: betaRoot,
             conditions:
             conditions,
             earlierConditions: []
         )
-        return buildOrSharePNode(parent: currentNode)
+        return buildOrSharePNode(parent: currentNode, target: target)
     }
 
     /// Builds or shares a p-node.
@@ -216,17 +218,27 @@ extension ReteNetwork {
     ///
     /// - Returns: a new or existing p-node.
     ///
-    private func buildOrSharePNode(parent: ReteNode) -> PNode {
+    private func buildOrSharePNode(parent: ReteNode, target: ProductionTarget) -> PNode {
         // look for an existing node to share
-        if let existing = parent.children.first(where: { $0 is PNode }) as? PNode {
+        if let existing = findExistingPNode(parent: parent, target: target) {
             return existing
         }
 
         // create new node
-        let new = PNode(parent: parent)
+        let new = PNode(parent: parent, target: target)
         parent.add(child: new)
         updateNewNodeWithMatchesFromAbove(newNode: new)
         return new
+    }
+
+    private func findExistingPNode(parent: ReteNode, target: ProductionTarget) -> PNode? {
+        func test(node: ReteNode) -> Bool {
+            guard let pNode = node as? PNode else {
+                return false
+            }
+            return pNode.target == target
+        }
+        return parent.children.first(where: test) as? PNode
     }
 
     /// Builds or shares a network structure for the given conditions underneath

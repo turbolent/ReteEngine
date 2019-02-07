@@ -25,11 +25,20 @@
 /// > the name of the production, its right-hand-side actions, etc. A p-node may also contain
 /// > information about the names of the variables that occur in the production.
 ///
-public final class PNode<WME>: ReteNode<WME>
-    where WME: ReteEngine.WME
+public final class PNode<Target>: ReteNode<Target.WME>, Equatable
+    where Target: ProductionTarget
 {
+    public typealias WME = Target.WME
+
     /// The matching tokens.
     public private(set) var items: [Token] = []
+
+    public weak var target: Target?
+
+    public init(parent: ReteNode, target: Target? = nil) {
+        self.target = target
+        super.init(parent: parent)
+    }
 
     /// Informs the node of a new match (a token and a working memory entry).
     ///
@@ -45,5 +54,13 @@ public final class PNode<WME>: ReteNode<WME>
     public override func leftActivation(token: Token, wme: WME?, bindings: [String: Constant]) {
         let newToken = Token(parent: token, wme: wme, bindings: bindings)
         items.append(newToken)
+        target?.productionNodeDidActivate(pNode: self)
+    }
+
+    public static func == (lhs: PNode<Target>, rhs: PNode<Target>) -> Bool {
+        return lhs.items == rhs.items
+            && lhs.parent === rhs.parent
+            && zip(lhs.children, rhs.children)
+                .allSatisfy { $0 === $1 }
     }
 }
