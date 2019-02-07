@@ -30,7 +30,7 @@ public class ReteNode<WME>
     public private(set) var children: [ReteNode]
 
     /// The node's parent node.
-    public let parent: ReteNode?
+    public weak var parent: ReteNode?
 
     /// Creates a new Rete node for the given children and parent node, if any.
     ///
