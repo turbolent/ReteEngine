@@ -8,18 +8,18 @@ public struct Condition<WME>: Hashable
     where WME: ReteEngine.WME
 {
     public typealias Constant = WME.Constant
-    public typealias ConditionField = ReteEngine.ConditionField<Constant>
+    public typealias Field = ReteEngine.Field<Constant>
 
-    public let identifier: ConditionField
-    public let attribute: ConditionField
-    public let value: ConditionField
+    public let identifier: Field
+    public let attribute: Field
+    public let value: Field
 
     /// Creates a condition for the given identifier, attribute, and value fields.
     ///
     public init(
-        identifier: ConditionField,
-        attribute: ConditionField,
-        value: ConditionField
+        identifier: Field,
+        attribute: Field,
+        value: Field
     ) {
         self.identifier = identifier
         self.attribute = attribute
@@ -29,9 +29,9 @@ public struct Condition<WME>: Hashable
     /// Creates a condition for the given identifier, attribute, and value fields.
     ///
     public init(
-        _ identifier: ConditionField,
-        _ attribute: ConditionField,
-        _ value: ConditionField
+        _ identifier: Field,
+        _ attribute: Field,
+        _ value: Field
     ) {
         self.init(
             identifier: identifier,

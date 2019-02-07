@@ -25,4 +25,6 @@ public protocol WME: Hashable {
     var identifier: Constant { get }
     var attribute: Constant { get }
     var value: Constant { get }
+
+    init(identifier: Constant, attribute: Constant, value: Constant)
 }
