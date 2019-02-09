@@ -29,14 +29,18 @@ public final class PNode<Target>: ReteNode<Target.WME>, Equatable
     where Target: ProductionTarget
 {
     public typealias WME = Target.WME
+    public typealias RuleAction = ReteEngine.RuleAction<WME>
 
     /// The matching tokens.
     public private(set) var items: [Token] = []
 
     public weak var target: Target?
 
-    public init(parent: ReteNode, target: Target? = nil) {
+    public let actions: [RuleAction]
+
+    public init(parent: ReteNode, target: Target?, actions: [RuleAction]) {
         self.target = target
+        self.actions = actions
         super.init(parent: parent)
     }
 

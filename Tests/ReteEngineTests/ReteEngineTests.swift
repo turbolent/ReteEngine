@@ -21,20 +21,23 @@ final class ReteEngineTests: XCTestCase {
         let testTarget = TestTarget<Triple<String>>()
         let workingMemory = SetWorkingMemory<Triple<String>>()
         let network = ReteNetwork<SetWorkingMemory, TestTarget>(workingMemory: workingMemory)
-        let conditions1: [Condition<Triple<String>>] = [
-            Condition(
-                .variable(name: "son"),
-                .constant("hasFather"),
-                .variable(name: "father")
-            ),
-            Condition(
-                .variable(name: "father"),
-                .constant("hasBrother"),
-                .variable(name: "fathersBrother")
-            )
-        ]
+        let rule1: Rule<Triple> = Rule(
+            conditions: [
+                Condition(
+                    .variable(name: "son"),
+                    .constant("hasFather"),
+                    .variable(name: "father")
+                ),
+                Condition(
+                    .variable(name: "father"),
+                    .constant("hasBrother"),
+                    .variable(name: "fathersBrother")
+                )
+            ],
+            actions: []
+        )
         let pNode1 = network.addProduction(
-            conditions: conditions1,
+            rule: rule1,
             target: testTarget
         )
         XCTAssertEqual(pNode1.items.count, 0)
@@ -59,15 +62,18 @@ final class ReteEngineTests: XCTestCase {
             ])
         )
 
-        let conditions2: [Condition<Triple<String>>] = [
-            Condition(
-                .variable(name: "x"),
-                .variable(name: "y"),
-                .variable(name: "z")
-            )
-        ]
+        let rule2 = Rule<Triple<String>>(
+            conditions: [
+                Condition<Triple<String>>(
+                    .variable(name: "x"),
+                    .variable(name: "y"),
+                    .variable(name: "z")
+                )
+            ],
+            actions: []
+        )
         let pNode2 = network.addProduction(
-            conditions: conditions2,
+            rule: rule2,
             target: testTarget
         )
         XCTAssertEqual(pNode1.items.count, 1)
@@ -144,20 +150,23 @@ final class ReteEngineTests: XCTestCase {
         testTarget.activations.removeAll()
 
         network.add(wme: Triple("D", "hasSister", "F"))
-        let conditions3: [Condition<Triple<String>>] = [
-            Condition(
-                .variable(name: "son"),
-                .constant("hasFather"),
-                .variable(name: "father")
-            ),
-            Condition(
-                .variable(name: "father"),
-                .constant("hasSister"),
-                .variable(name: "fathersSister")
-            )
-        ]
+        let rule3 = Rule<Triple>(
+            conditions: [
+                Condition(
+                    .variable(name: "son"),
+                    .constant("hasFather"),
+                    .variable(name: "father")
+                ),
+                Condition(
+                    .variable(name: "father"),
+                    .constant("hasSister"),
+                    .variable(name: "fathersSister")
+                )
+            ],
+            actions: []
+        )
         let pNode3 = network.addProduction(
-            conditions: conditions3,
+            rule: rule3,
             target: testTarget
         )
         XCTAssertEqual(pNode1.items.count, 2)
@@ -215,8 +224,12 @@ final class ReteEngineTests: XCTestCase {
             .constant("color"),
             .constant("red")
         )
-        network.addProduction(
+        let rule = Rule(
             conditions: [c0, c1, c2],
+            actions: []
+        )
+        network.addProduction(
+            rule: rule,
             target: testTarget
         )
 
@@ -277,7 +290,14 @@ final class ReteEngineTests: XCTestCase {
             .constant("color"),
             .constant("red")
         )
-        network.addProduction(conditions: [c0, c1, c2], target: testTarget)
+        let rule = Rule(
+            conditions: [c0, c1, c2],
+            actions: []
+        )
+        network.addProduction(
+            rule: rule,
+            target: testTarget
+        )
 
         let wmes = [
             Triple("B1", "self", "B1"),
@@ -324,12 +344,20 @@ final class ReteEngineTests: XCTestCase {
             .constant("B4")
         )
 
-        let p0 = network.addProduction(
+        let rule0 = Rule(
             conditions: [c0, c1, c2],
+            actions: []
+        )
+        let p0 = network.addProduction(
+            rule: rule0,
             target: testTarget
         )
-        let p1 = network.addProduction(
+        let rule1 = Rule(
             conditions: [c0, c1, c3, c4],
+            actions: []
+        )
+        let p1 = network.addProduction(
+            rule: rule1,
             target: testTarget
         )
 
@@ -348,8 +376,12 @@ final class ReteEngineTests: XCTestCase {
             network.add(wme: wme)
         }
 
-        let p2 = network.addProduction(
+        let rule2 = Rule(
             conditions: [c0, c1, c3, c2],
+            actions: []
+        )
+        let p2 = network.addProduction(
+            rule: rule2,
             target: testTarget
         )
 
@@ -386,6 +418,62 @@ final class ReteEngineTests: XCTestCase {
         XCTAssertEqual(
             p1.substitute(bindings: ["x": "1", "z": "3"]),
             nil
+        )
+    }
+
+    func testRuleAction() {
+        let workingMemory = SetWorkingMemory<Triple<String>>()
+        let network = ReteNetwork<SetWorkingMemory, ForwardTarget<SetWorkingMemory>>(workingMemory: workingMemory)
+        let forwardTarget = ForwardTarget(network: network)
+
+        // RDF(S) Entailment Rule 6: (?a ?p ?b) ^ (?p subPropertyOf ?q) => add(?a ?q ?b)
+
+        let rdfs6 = Rule<Triple>(
+            conditions: [
+                Condition(
+                    .variable(name: "a"),
+                    .variable(name: "p"),
+                    .variable(name: "b")
+                ),
+                Condition(
+                    .variable(name: "p"),
+                    .constant("subPropertyOf"),
+                    .variable(name: "q")
+                ),
+                ],
+            actions: [
+                .add(ActionPattern(
+                    .variable(name: "a"),
+                    .variable(name: "q"),
+                    .variable(name: "b")
+                ))
+            ]
+        )
+
+        network.addProduction(rule: rdfs6, target: forwardTarget)
+
+        network.add(wme: Triple("A", "hasChild", "B"))
+        network.add(wme: Triple("hasChild", "subPropertyOf", "hasAncestor"))
+
+        XCTAssertEqual(
+            workingMemory.workingMemoryEntries,
+            [
+                Triple("A", "hasChild", "B"),
+                Triple("hasChild", "subPropertyOf", "hasAncestor"),
+                Triple("A", "hasAncestor", "B"),
+            ]
+        )
+
+        network.add(wme: Triple("hasAncestor", "subPropertyOf", "isRelatedTo"))
+        XCTAssertEqual(
+            workingMemory.workingMemoryEntries,
+            [
+                Triple("A", "hasChild", "B"),
+                Triple("hasChild", "subPropertyOf", "hasAncestor"),
+                Triple("A", "hasAncestor", "B"),
+                Triple("hasAncestor", "subPropertyOf", "isRelatedTo"),
+                Triple("A", "isRelatedTo", "B")
+            ]
         )
     }
 }

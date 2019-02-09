@@ -62,4 +62,33 @@ public struct ActionPattern<WME>: Hashable
             value: valueConstant
         )
     }
+
+    /// Returns a working memory entry by substituting all variable fields with
+    /// the constants by using a lookup function.
+    ///
+    /// - Parameter getBinding: The function to get a binding for a variable.
+    ///
+    /// - Returns: A working memory entry, if all variables can be subsituted.
+    ///
+    public func substitute(getBinding: (String) -> Constant?) -> WME? {
+        guard
+            let identifierConstant = identifier.substitute(getBinding: getBinding),
+            let attributeConstant = attribute.substitute(getBinding: getBinding),
+            let valueConstant = value.substitute(getBinding: getBinding)
+        else {
+                return nil
+        }
+
+        return WME(
+            identifier: identifierConstant,
+            attribute: attributeConstant,
+            value: valueConstant
+        )
+    }
+}
+
+extension ActionPattern: CustomStringConvertible {
+    public var description: String {
+        return "(\(identifier) ^\(attribute) \(value))"
+    }
 }

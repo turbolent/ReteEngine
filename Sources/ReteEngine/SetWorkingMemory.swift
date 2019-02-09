@@ -1,5 +1,5 @@
 
-public struct SetWorkingMemory<WME>: WorkingMemory
+public final class SetWorkingMemory<WME>: WorkingMemory
     where WME: ReteEngine.WME
 {
     /// The working memory entries
@@ -9,7 +9,7 @@ public struct SetWorkingMemory<WME>: WorkingMemory
         return workingMemoryEntries.makeIterator()
     }
 
-    public mutating func insert(wme: WME) -> Bool {
+    public func insert(wme: WME) -> Bool {
         let (inserted, _) = workingMemoryEntries.insert(wme)
         return inserted
     }

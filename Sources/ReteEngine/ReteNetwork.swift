@@ -39,6 +39,8 @@ public final class ReteNetwork<WorkingMemory, ProductionTarget>
     public typealias PNode = ReteEngine.PNode<ProductionTarget>
     public typealias AlphaMemoryIndex = ReteEngine.AlphaMemoryIndex<Constant>
     public typealias DummyTopNode = ReteEngine.DummyTopNode<WME>
+    public typealias Rule = ReteEngine.Rule<WME>
+    public typealias RuleAction = ReteEngine.RuleAction<WME>
 
     /// The indexed alpha memories.
     public private(set) var alphaMemories: [AlphaMemoryIndex: AlphaMemory] = [:]
@@ -202,41 +204,62 @@ extension ReteNetwork {
     /// ```
     ///
     @discardableResult
-    public func addProduction(conditions: [Condition], target: ProductionTarget) -> PNode {
+    public func addProduction(rule: Rule, target: ProductionTarget) -> PNode {
         let currentNode = buildOrShareNetworkForConditions(
             parent: betaRoot,
-            conditions:
-            conditions,
+            conditions: rule.conditions,
             earlierConditions: []
         )
-        return buildOrSharePNode(parent: currentNode, target: target)
+        return buildOrSharePNode(
+            parent: currentNode,
+            target: target,
+            actions: rule.actions
+        )
     }
 
     /// Builds or shares a p-node.
     ///
-    /// - Parameter parent: The parent Rete node.
+    /// - Parameters:
+    ///   - parent: The parent Rete node.
+    ///   - target: The target when the p-node is activated.
+    ///   - actions: The actions to be performed when the p-node is activated.
     ///
     /// - Returns: a new or existing p-node.
     ///
-    private func buildOrSharePNode(parent: ReteNode, target: ProductionTarget) -> PNode {
+    private func buildOrSharePNode(
+        parent: ReteNode,
+        target: ProductionTarget,
+        actions: [RuleAction]
+    ) -> PNode {
+
         // look for an existing node to share
-        if let existing = findExistingPNode(parent: parent, target: target) {
+        if let existing = findExistingPNode(
+            parent: parent,
+            target: target,
+            actions: actions
+        ) {
             return existing
         }
 
         // create new node
-        let new = PNode(parent: parent, target: target)
+        let new = PNode(parent: parent, target: target, actions: actions)
         parent.add(child: new)
         updateNewNodeWithMatchesFromAbove(newNode: new)
         return new
     }
 
-    private func findExistingPNode(parent: ReteNode, target: ProductionTarget) -> PNode? {
+    private func findExistingPNode(
+        parent: ReteNode,
+        target: ProductionTarget,
+        actions: [RuleAction]
+    ) -> PNode? {
+
         func test(node: ReteNode) -> Bool {
             guard let pNode = node as? PNode else {
                 return false
             }
             return pNode.target == target
+                && pNode.actions == actions
         }
         return parent.children.first(where: test) as? PNode
     }
