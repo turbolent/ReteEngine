@@ -22,8 +22,8 @@ public struct Rule<WME>: Hashable
 extension Rule: CustomStringConvertible {
 
     public var description: String {
-        let body = conditions.map(String.init).joined(separator: " ∧ ")
+        let body = conditions.map(String.init).joined(separator: " ^ ")
         let head = actions.map(String.init).joined(separator: ", ")
-        return [body, head].joined(separator: " ⇒ ")
+        return [body, head].joined(separator: " => ")
     }
 }

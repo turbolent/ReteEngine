@@ -423,10 +423,12 @@ final class ReteEngineTests: XCTestCase {
 
     func testRuleAction() {
         let workingMemory = SetWorkingMemory<Triple<String>>()
-        let network = ReteNetwork<SetWorkingMemory, ForwardTarget<SetWorkingMemory>>(workingMemory: workingMemory)
+        let network = ReteNetwork<SetWorkingMemory, ForwardTarget<SetWorkingMemory>>(
+            workingMemory: workingMemory
+        )
         let forwardTarget = ForwardTarget(network: network)
 
-        // RDF(S) Entailment Rule 6: (?a ?p ?b) ^ (?p subPropertyOf ?q) => add(?a ?q ?b)
+        // RDF(S) Entailment Rule 6: [ ($a ^$p $b) ^ ($p ^subPropertyOf $q) => add($a ^$q $b) ]
 
         let rdfs6 = Rule<Triple>(
             conditions: [
@@ -476,4 +478,87 @@ final class ReteEngineTests: XCTestCase {
             ]
         )
     }
+
+    func testRuleParser() throws {
+        let rules = """
+            [(a ^b c)  ^($a ^$b $c) ^   (a ^b  $c)=> add($a ^$b $c)  , add(a ^b c) ]
+              [  (a ^b c)^ \n  ($a ^$b $c) ^ \t (a ^b  $c)  =>add($a ^$b $c)]
+            """
+        let iterator = rules.unicodeScalars.makeIterator()
+        let parser = try RuleParser<Triple<String>>(input: iterator) { $0 }
+        XCTAssertEqual(
+            try parser.parse(),
+            Rule(
+                conditions: [
+                    Condition(
+                        .constant("a"),
+                        .constant("b"),
+                        .constant("c")
+                    ),
+                    Condition(
+                        .variable(name: "a"),
+                        .variable(name: "b"),
+                        .variable(name: "c")
+                    ),
+                    Condition(
+                        .constant("a"),
+                        .constant("b"),
+                        .variable(name: "c")
+                    )
+                ],
+                actions: [
+                    .add(
+                        ActionPattern(
+                            .variable(name: "a"),
+                            .variable(name: "b"),
+                            .variable(name: "c")
+                        )
+                    ),
+                    .add(
+                        ActionPattern(
+                            .constant("a"),
+                            .constant("b"),
+                            .constant("c")
+                        )
+                    )
+                ]
+            )
+        )
+        XCTAssertEqual(
+            try parser.parse(),
+            Rule(
+                conditions: [
+                    Condition(
+                        .constant("a"),
+                        .constant("b"),
+                        .constant("c")
+                    ),
+                    Condition(
+                        .variable(name: "a"),
+                        .variable(name: "b"),
+                        .variable(name: "c")
+                    ),
+                    Condition(
+                        .constant("a"),
+                        .constant("b"),
+                        .variable(name: "c")
+                    )
+                ],
+                actions: [
+                    .add(
+                        ActionPattern(
+                            .variable(name: "a"),
+                            .variable(name: "b"),
+                            .variable(name: "c")
+                        )
+                    )
+                ]
+            )
+        )
+        XCTAssertEqual(
+            try parser.parse(),
+            nil
+        )
+    }
 }
+
