@@ -21,19 +21,23 @@ public final class RuleParser<WME>
         }
     }
 
-    private var input: AnyIterator<Unicode.Scalar>
-    private let makeConstant: (String) -> WME.Constant
+    public private(set) var input: AnyIterator<Unicode.Scalar>
+    public let fieldCharacterSet: CharacterSet
+    public let makeConstant: (String) -> WME.Constant
     private var character: Unicode.Scalar?
     public private(set) var position = 0
 
     public init<Iterator>(
         input: Iterator,
+        fieldCharacterSet: CharacterSet = CharacterSet.whitespacesAndNewlines.inverted,
         makeConstant: @escaping (String) -> WME.Constant
     ) throws
         where Iterator: IteratorProtocol,
             Iterator.Element == Unicode.Scalar
     {
         self.input = AnyIterator(input)
+        self.fieldCharacterSet = fieldCharacterSet
+            .subtracting(["[", "]", "(", ")", "$", "^", ",", "=", ">"])
         self.makeConstant = makeConstant
         readCharacter()
     }
@@ -166,17 +170,17 @@ public final class RuleParser<WME>
 
         guard let character = character else {
             throw Error(
-                description: "expected field (variable or constant), but EOF",
+                description: "expected field (variable or constant), but got EOF",
                 position: position
             )
         }
 
         if character == "$" {
             readCharacter()
-            let variableName = try readOneOrMore(.alphanumerics, description: "variable name")
+            let variableName = try readOneOrMore(fieldCharacterSet, description: "variable name")
             return .variable(name: variableName)
-        } else if CharacterSet.alphanumerics.contains(character) {
-            let constantString = try readOneOrMore(.alphanumerics, description: "constant")
+        } else if fieldCharacterSet.contains(character) {
+            let constantString = try readOneOrMore(fieldCharacterSet, description: "constant")
             let constant = makeConstant(constantString)
             return .constant(constant)
         } else {
