@@ -560,5 +560,27 @@ final class ReteEngineTests: XCTestCase {
             nil
         )
     }
+
+    func testWMEParser() throws {
+        let rules = """
+            a+ b_#$%  c_c    .
+            a.a.a. b-b-b- c.c.c. .
+            """
+        let iterator = rules.unicodeScalars.makeIterator()
+        let parser = try WMEParser<Triple<String>>(input: iterator) { $0 }
+
+        XCTAssertEqual(
+            try parser.parse(),
+            Triple(identifier: "a+", attribute: "b_#$%", value: "c_c")
+        )
+        XCTAssertEqual(
+            try parser.parse(),
+            Triple(identifier: "a.a.a.", attribute: "b-b-b-", value: "c.c.c.")
+        )
+        XCTAssertEqual(
+            try parser.parse(),
+            nil
+        )
+    }
 }
 
