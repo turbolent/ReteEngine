@@ -10,6 +10,7 @@ extension ReteEngineTests {
         ("testRuleAction", testRuleAction),
         ("testRuleParser", testRuleParser),
         ("testTokenBinding", testTokenBinding),
+        ("testWMEParser", testWMEParser),
     ]
 }
 
