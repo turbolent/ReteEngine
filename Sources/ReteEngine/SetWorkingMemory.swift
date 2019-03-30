@@ -5,6 +5,8 @@ public final class SetWorkingMemory<WME>: WorkingMemory
     /// The working memory entries
     public private(set) var workingMemoryEntries: Set<WME> = []
 
+    public init() {}
+
     public func makeIterator() -> Set<WME>.Iterator {
         return workingMemoryEntries.makeIterator()
     }

@@ -15,12 +15,16 @@ private final class TestTarget<WME>: ProductionTarget, Equatable
     }
 }
 
+private typealias TestProductionTarget = TestTarget<Triple<String>>
+private typealias TestWorkingMemory = SetWorkingMemory<Triple<String>>
+
 final class ReteEngineTests: XCTestCase {
 
     func testProductionItems() {
-        let testTarget = TestTarget<Triple<String>>()
-        let workingMemory = SetWorkingMemory<Triple<String>>()
-        let network = ReteNetwork<SetWorkingMemory, TestTarget>(workingMemory: workingMemory)
+        let testTarget = TestProductionTarget()
+        let workingMemory = TestWorkingMemory()
+        let network =
+            ReteNetwork<TestWorkingMemory, TestProductionTarget>(workingMemory: workingMemory)
         let rule1: Rule<Triple> = Rule(
             conditions: [
                 Condition(
@@ -206,9 +210,10 @@ final class ReteEngineTests: XCTestCase {
     }
 
     func testNetwork() {
-        let testTarget = TestTarget<Triple<String>>()
-        let workingMemory = SetWorkingMemory<Triple<String>>()
-        let network = ReteNetwork<SetWorkingMemory, TestTarget>(workingMemory: workingMemory)
+        let testTarget = TestProductionTarget()
+        let workingMemory = TestWorkingMemory()
+        let network =
+            ReteNetwork<TestWorkingMemory, TestProductionTarget>(workingMemory: workingMemory)
         let c0 = Condition<Triple>(
             .variable(name: "x"),
             .constant("on"),
@@ -272,9 +277,10 @@ final class ReteEngineTests: XCTestCase {
     }
 
     func testDuplicate() {
-        let testTarget = TestTarget<Triple<String>>()
-        let workingMemory = SetWorkingMemory<Triple<String>>()
-        let network = ReteNetwork<SetWorkingMemory, TestTarget>(workingMemory: workingMemory)
+        let testTarget = TestProductionTarget()
+        let workingMemory = TestWorkingMemory()
+        let network =
+            ReteNetwork<TestWorkingMemory, TestProductionTarget>(workingMemory: workingMemory)
         let c0 = Condition<Triple>(
             .variable(name: "x"),
             .constant("self"),
@@ -315,9 +321,10 @@ final class ReteEngineTests: XCTestCase {
     }
 
     func testMultiProductions() {
-        let testTarget = TestTarget<Triple<String>>()
-        let workingMemory = SetWorkingMemory<Triple<String>>()
-        let network = ReteNetwork<SetWorkingMemory, TestTarget>(workingMemory: workingMemory)
+        let testTarget = TestProductionTarget()
+        let workingMemory = TestWorkingMemory()
+        let network =
+            ReteNetwork<TestWorkingMemory, TestProductionTarget>(workingMemory: workingMemory)
         let c0 = Condition<Triple>(
             .variable(name: "x"),
             .constant("on"),
@@ -422,8 +429,8 @@ final class ReteEngineTests: XCTestCase {
     }
 
     func testRuleAction() {
-        let workingMemory = SetWorkingMemory<Triple<String>>()
-        let network = ReteNetwork<SetWorkingMemory, ForwardTarget<SetWorkingMemory>>(
+        let workingMemory = TestWorkingMemory()
+        let network = ReteNetwork<TestWorkingMemory, ForwardTarget<TestWorkingMemory>>(
             workingMemory: workingMemory
         )
         let forwardTarget = ForwardTarget(network: network)
